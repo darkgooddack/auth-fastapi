@@ -1,10 +1,22 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
+import logging
+import redis
+
 from app.models.base import Base, engine
 from app.routers import auth, users
 
-app = FastAPI()
+from app.core.config import settings
+
+try:
+    redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
+    redis_client.ping()
+    logging.info("✅ Подключено к Redis")
+except redis.exceptions.ConnectionError:
+    logging.error("🚨 Ошибка подключения к Redis!")
+
+app = FastAPI(title="Auth API")
 
 Base.metadata.create_all(bind=engine)
 
