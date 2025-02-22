@@ -70,6 +70,7 @@ username=testuser&password=password123
     "token_type": "bearer"
 }
 ```
+
 ##### 🔹 Доступ к защищённому ресурсу
 
 GET /protected (с токеном)
