@@ -61,6 +61,7 @@ async def login(user: UserCreate, db: Session = Depends(get_db)):
     logging.info(f"✅ Выдан токен пользователю: {db_user.username}")
     return {"access_token": access_token, "token_type": "bearer"}
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 @router.get("/protected")
 async def protected_route(token: str = Depends(oauth2_scheme)):
@@ -80,6 +81,7 @@ async def protected_route(token: str = Depends(oauth2_scheme)):
             if stored_token is None:
                 logging.error(f"❌ Токен отсутствует в Redis для пользователя {user_id}")
                 raise HTTPException(status_code=401, detail="Invalid token")
+
             if stored_token != token:
                 logging.error(f"❌ Токен пользователя {user_id} не совпадает с хранимым в Redis")
                 raise HTTPException(status_code=401, detail="Invalid token")
@@ -87,9 +89,6 @@ async def protected_route(token: str = Depends(oauth2_scheme)):
         logging.info(f"✅ Доступ разрешён для пользователя {user_id}")
         return {"message": f"Привет, {user_id}! Твой токен действителен."}
 
-    except jwt.ExpiredSignatureError:
-        logging.error("❌ Ошибка: срок действия токена истёк")
-        raise HTTPException(status_code=401, detail="Token expired")
     except jwt.PyJWTError:
         logging.error("❌ Ошибка: токен недействителен")
         raise HTTPException(status_code=401, detail="Invalid token")
@@ -123,6 +122,3 @@ async def logout(token: str = Depends(oauth2_scheme)):
     except jwt.ExpiredSignatureError:
         logging.warning("⚠️ Попытка выхода с уже истекшим токеном")
         return {"message": "Вы уже вышли из системы (токен истёк)"}
-    except jwt.PyJWTError:
-        logging.error("❌ Ошибка: недействительный токен при попытке выхода")
-        raise HTTPException(status_code=401, detail="Invalid token")

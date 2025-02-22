@@ -9,12 +9,12 @@ from app.routers import auth, users
 
 from app.core.config import settings
 
-try:
-    redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
-    redis_client.ping()
-    logging.info("✅ Подключено к Redis")
-except redis.exceptions.ConnectionError:
-    logging.error("🚨 Ошибка подключения к Redis!")
+# try:
+#     redis_client = redis.Redis(host=settings.REDIS_HOST, port=settings.REDIS_PORT, decode_responses=True)
+#     redis_client.ping()
+#     logging.info("✅ Подключено к Redis")
+# except redis.exceptions.ConnectionError:
+#     logging.error("🚨 Ошибка подключения к Redis!")
 
 app = FastAPI(title="Auth API")
 
