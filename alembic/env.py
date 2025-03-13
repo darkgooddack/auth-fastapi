@@ -18,6 +18,7 @@ fileConfig(config.config_file_name)
 
 from app.models.base import Base
 from app.models.user import User
+from app.models.job import Job
 
 target_metadata = Base.metadata
 
