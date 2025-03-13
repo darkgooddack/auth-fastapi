@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     load_dotenv()
 
     DATABASE_URL: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_PORT: int
     REDIS_HOST: str = "localhost"
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
