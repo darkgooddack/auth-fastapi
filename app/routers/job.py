@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import APIRouter, Depends, HTTPException, Form, Query
+import requests
 from sqlalchemy.orm import Session
 from app.models.base import get_db
 from app.crud.job import create_job, update_job, get_job_by_title, delete_job,get_job_by_id
@@ -154,3 +155,59 @@ async def delete_vacancy(
     return {"message": "Vacancy successfully deleted"}
 
 
+
+@router.post("/parse")
+async def parse_vacancies(
+        search_query: str = Query(..., description="Поисковый запрос"),
+        count: int = Query(10, description="Количество вакансий для загрузки"),
+        db: Session = Depends(get_db)
+):
+    """
+    **Парсинг вакансий с hh.ru**
+    - 🔍 Получает вакансии по заданному поисковому запросу.
+    - 📥 Сохраняет их в БД, если таких ещё нет.
+    """
+
+    hh_api_url = "https://api.hh.ru/vacancies"
+
+    params = {"text": search_query, "per_page": count}
+    response = requests.get(hh_api_url, params=params)
+
+    if response.status_code != 200:
+        logging.error("❌ Ошибка запроса к API hh.ru")
+        raise HTTPException(status_code=500, detail="Failed to fetch data from hh.ru")
+
+    logging.info(f"✅ Запрос к API hh.ru {hh_api_url} прошёл успешно")
+    vacancies = response.json().get("items", [])
+
+    added_count = 0
+    for vacancy in vacancies:
+        if not isinstance(vacancy, dict):
+            continue
+
+        employer = vacancy.get("employer")
+        address = vacancy.get("address")
+
+        title = vacancy.get("name", "Не указано")
+        logo_url = employer["logo_urls"]["original"] if employer and employer.get("logo_urls") else ""
+        company_name = employer["name"] if employer and employer.get("name") else "Не указано"
+        company_address = address["city"] if address and address.get("city") else "Не указан"
+        description = vacancy.get("description", "Описание отсутствует")
+        status = vacancy["schedule"]["name"] if vacancy.get("schedule") and vacancy["schedule"].get("name") else "Не указан"
+
+        if get_job_by_title(db, title):
+            continue
+
+        job_data = JobCreate(
+            title=title,
+            status=status,
+            company_name=company_name,
+            company_address=company_address,
+            logo_url=logo_url,
+            description=description
+        )
+        create_job(db, job_data)
+        added_count += 1
+
+    logging.info(f"✅ Добавлено вакансий: {added_count}")
+    return {"message": "Parsing completed", "added": added_count}
