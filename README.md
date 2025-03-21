@@ -58,11 +58,11 @@ alembic upgrade head
 docker run -d --name redis-container -p 6379:6379 redis
 uvicorn main:app --reload
 ```
-### Использование API
+### API Usage
 
-#### Был добавлен prefix=/api/v1
+#### Added prefix: /api/v1
 
-##### Регистрация
+##### User Registration
 POST /users/register
 ```
 {
@@ -70,7 +70,7 @@ POST /users/register
     "password": "password123"
 }
 ```
-##### Авторизация
+##### Authentication
 POST /auth/token
 ```
 Content-Type: application/x-www-form-urlencoded
@@ -78,7 +78,7 @@ Content-Type: application/x-www-form-urlencoded
 username=testuser&password=password123
 ```
 
-✅ Ответ:
+✅ Response:
 ```
 {
     "access_token": "your_jwt_token",
@@ -88,9 +88,9 @@ username=testuser&password=password123
 ![img_3.png](img_3.png)
 ![img_4.png](img_4.png)
 
-##### Доступ к защищённому ресурсу
+##### Accessing a Protected Resource
 
-GET /protected (с токеном)
+GET /protected (with token)
 ```
 Authorization: Bearer your_jwt_token
 ```
@@ -98,97 +98,97 @@ Authorization: Bearer your_jwt_token
 
 ##### Logout 
 
-POST /logout (с токеном)
+POST /logout (with token)
 ```
 Authorization: Bearer your_jwt_token
 ```
 ![img_1.png](img_1.png)
 ![img_2.png](img_2.png)
 
-### API для вакансий
-#### 1. Создание вакансии
+### Job Listings API
+#### 1. Create a Job Listing
 ##### POST /create
 
-Создаёт новую вакансию. Если вакансия с таким названием уже существует, возвращает ошибку.
+Creates a new job listing. If a listing with the same title already exists, an error is returned.
 
-Параметры (form-data):
-- title (str) - Название вакансии
-- status (str) - Статус вакансии
-- company_name (str) - Название компании
-- company_address (str) - Адрес компании
-- logo_url (str) - Логотип компании
-- description (str) - Описание вакансии
+Parameters  (form-data):
+- title (str) - Job title
+- status (str) - Job status
+- company_name (str) - Company name
+- company_address (str) - Company address
+- logo_url (str) - Company logo
+- description (str) - Job description
 
-Ответы
-- 201 - Вакансия успешно создана
-- 400 - Вакансия уже существует
+Responses:
+- 201 - Job successfully created
+- 400 - Job already exists
 
-#### 2. Обновление вакансии
+#### 2. Update a Job Listing
 ##### PUT /update/{job_id}
 
-Обновляет информацию о вакансии по ID.
+Updates job information by ID.
 
-Параметры (form-data):
-- job_id (int) - ID вакансии
-- title (str) - Название вакансии
-- status (str) - Статус вакансии
-- company_name (str) - Название компании
-- company_address (str) - Адрес компании
-- logo_url (str) - Логотип компании
-- description (str) - Описание вакансии
+Parameters (form-data):
+- job_id (int) - Job ID
+- title (str) - Job title
+- status (str) - Job status
+- company_name (str) - Company name
+- company_address (str) - Company address
+- logo_url (str) - Company logo
+- description (str) - Job description
 
-Ответы
-- 200 - Вакансия успешно обновлена
-- 404 - Вакансия не найдена
+Responses:
+- 200 - Job successfully updated
+- 404 - Job not found
 
-#### 3. Получение вакансии по ID
+#### 3. Get a Job Listing by ID
 ##### GET /get/{job_id}
 
-Возвращает информацию о вакансии по её ID.
+Returns job details by ID.
 
-Параметры:
-- job_id (int) - ID вакансии
+Parameters:
+- job_id (int) - Job ID
 
-Ответы
-- 200 - Вакансия найдена, возвращает объект вакансии
-- 404 - Вакансия не найдена
+Responses:
+- 200 - Job found, returns job details
+- 404 - Job not found
 
 ####  4. Удаление вакансии
 ###### DELETE /delete/{job_id}
 
-Удаляет вакансию по её ID.
+Deletes a job listing by ID.
 
-Параметры:
-- job_id (int) - ID вакансии
+Parameters:
+- job_id (int) - Job ID
 
-Ответы
-- 200 - Вакансия успешно удалена
-- 404 - Вакансия не найдена
+Responses:
+- 200 - Job successfully deleted
+- 404 - Job not found
 
-####  5. Парсинг вакансий с hh.ru
-###### Метод: POST /parse
+####  5. Parse Job Listings from HH.ru
+###### POST /parse
 
-Этот эндпоинт позволяет парсить вакансии с сайта hh.ru по заданному поисковому запросу. Он извлекает информацию о вакансиях и сохраняет новые вакансии в базу данных, если таких вакансий ещё нет.
+This endpoint allows parsing job listings from HH.ru based on a given search query. It extracts job details and saves new job listings to the database if they don't already exist.
 
-Параметры запроса:
-- search_query (строка, обязательный параметр): Поисковый запрос для фильтрации вакансий (например, "Python developer").
-- count (целое число, по умолчанию 10): Количество вакансий для загрузки (по умолчанию — 10 вакансий).
+Query Parameters:
+- search_query (string, required): Search query to filter job listings (e.g., "Python developer").
+- count (integer, default: 10): Number of job listings to fetch (default is 10).
 
-Пример запроса:
+Example Request:
 
 ```
 POST /parse?search_query=Python+developer&count=10
 ```
 
-Ответ: Если запрос прошёл успешно, возвращается сообщение с количеством добавленных вакансий.
+Response: If the request is successful, it returns a message with the number of added job listings.
 
-Пример успешного ответа:
+Example Successful Response:
 ```
 {
   "message": "Parsing completed",
   "added": 10
 }
 ```
-Ошибки:
-- Если запрос к API hh.ru не удался (например, ошибка сети или сервер не ответил), возвращается ошибка с кодом 500.
-- Если ответ от API hh.ru не является валидным JSON, также возвращается ошибка с кодом 500.
+Errors:
+- If the request to the HH.ru API fails (e.g., network issue or server downtime), a 500 error is returned.
+- If the HH.ru API response is not valid JSON, a 500 error is also returned.
