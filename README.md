@@ -1,41 +1,41 @@
-##  Описание репозитория auth-fastapi
-### О проекте
-**auth-fastapi** — это простой и безопасный сервис аутентификации и авторизации, реализованный с использованием FastAPI, PostgreSQL и SQLAlchemy. Проект включает регистрацию пользователей, аутентификацию через JWT-токены и защиту маршрутов.
+##  Repository Description: auth-fastapi
+### About the Project
+**auth-fastapi** is a secure and flexible authentication and authorization service built with **FastAPI**, **PostgreSQL**, and **SQLAlchemy**. It supports user registration, JWT authentication, and route protection. Additionally, the project includes API endpoints for managing job listings from HH.ru.
 
-### Функционал
-##### ✅ Регистрация пользователей
-##### ✅ Аутентификация по JWT
-##### ✅ Хранение токенов в Redis
-##### ✅ CRUD операции над вакансиями с hh.ru
-##### ✅ Хеширование паролей (bcrypt)
-##### ✅ Подключение к PostgreSQL через SQLAlchemy
-##### ✅ CORSMiddleware для взаимодействия с React
+### Features
+##### ✅ User registration
+##### ✅ JWT authentication
+##### ✅ Token storage in Redis
+##### ✅ CRUD operations for job listings from HH.ru
+##### ✅ Password hashing (bcrypt)
+##### ✅ PostgreSQL connection via SQLAlchemy
+##### ✅ CORSMiddleware for integration with React
 
-### Структура проекта
+### Project Structure
 ```
 /app
-│── /core         # Конфигурация, безопасность
-│── /models       # SQLAlchemy-модели
-│── /schemas      # Pydantic-схемы
-│── /crud         # CRUD-операции
-│── /routers      # Роутеры FastAPI
-│── main.py       # Точка входа
+│── /core         # Configuration, security  
+│── /models       # SQLAlchemy models  
+│── /schemas      # Pydantic schemas  
+│── /crud         # CRUD operations  
+│── /routers      # FastAPI routers  
+│── main.py       # Entry point  
 ```
-### Установка и запуск
-1️⃣ Клонирование репозитория
+### Installation and Setup
+1️⃣ Clone the repository
 ```
 git clone https://github.com/darkgooddack/auth-fastapi.git
 cd auth-fastapi
 ```
-2️⃣ Установка зависимостей
+2️⃣ Install dependencies
 ```
 pip install -r requirements.txt
 ```
-- psycopg2==2.9.10 для локальной отладки
-- psycopg2-binary==2.9.10 для Docker 
+- psycopg2==2.9.10 for local debugging
+- psycopg2-binary==2.9.10 for Docker 
 
-3️⃣ Настройка окружения
-Создайте файл .env и укажите:
+3️⃣ Configure the environment
+Create a .env file and specify:
 ```
 DATABASE_URL=postgresql://user:password@localhost/dbname
 POSTGRES_PASSWORD=password
@@ -49,11 +49,11 @@ SECRET_KEY=your_secret_key
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 ```
-4️⃣ Запуск базы данных и миграций
+4️⃣ Start the database and migrations
 ```
 alembic upgrade head
 ```
-5️⃣ Запуск сервера
+5️⃣ Start the server
 ```
 docker run -d --name redis-container -p 6379:6379 redis
 uvicorn main:app --reload
