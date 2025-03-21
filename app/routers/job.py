@@ -14,37 +14,37 @@ logging.basicConfig(level=logging.INFO)
 @router.post(
     "/create",
     response_model=JobOut,
-    summary="Создание вакансии",
-    description="""Создаёт новую вакансию в системе, с возможностью парсинга данных с hh.ru.  
-    Если вакансия с таким названием уже существует, возвращает ошибку.
+    summary="Create a job vacancy",
+    description="""Creates a new job vacancy in the system, with the option to parse data from hh.ru.  
+    If a vacancy with the same title already exists, it returns an error.
     """,
     responses={
-        201: {"description": "Вакансия успешно создана"},
-        400: {"description": "Вакансия уже существует"}
+        201: {"description": "Job vacancy successfully created"},
+        400: {"description": "Vacancy already exists"}
     },
 )
 async def create_vacancy(
-        title: str = Form(..., description="Название вакансии"),
-        status: str = Form(..., description="Статус вакансии"),
-        company_name: str = Form(..., description="Название компании"),
-        company_address: str = Form(..., description="Адрес компании"),
-        logo_url: str = Form(..., description="Логотип компании"),
-        description: str = Form(..., description="Описание вакансии"),
+        title: str = Form(..., description="Job title"),
+        status: str = Form(..., description="Vacancy status"),
+        company_name: str = Form(..., description="Company name"),
+        company_address: str = Form(..., description="Company address"),
+        logo_url: str = Form(..., description="Company logo"),
+        description: str = Form(..., description="Job description"),
         db: Session = Depends(get_db)
 ):
     """
-    **Создание вакансии**
-    - ❌ Возвращает ошибку, если вакансия с таким названием уже существует.
+    **Create a job vacancy**
+    - ❌ Returns an error if a vacancy with the same title already exists.
     """
 
-    logging.info(f"✅ Попытка создать вакансию: {title}")
+    logging.info(f"✅ Attempting to create vacancy: {title}")
 
-    # Проверяем, существует ли уже вакансия с таким названием
+    # Check if a vacancy with this title already exists
     if get_job_by_title(db, title):
-        logging.warning(f"❌ Вакансия с названием {title} уже существует")
+        logging.warning(f"❌ Vacancy with title {title} already exists")
         raise HTTPException(status_code=400, detail="Vacancy already exists")
 
-    # Создаем объект JobCreate перед передачей в create_job
+    # Create a JobCreate object before passing it to create_job
     job_data = JobCreate(
         title=title,
         status=status,
@@ -55,7 +55,7 @@ async def create_vacancy(
     )
 
     new_job = create_job(db, job_data)
-    logging.info(f"✅ Вакансия {title} успешно создана")
+    logging.info(f"✅ Вакансия {title} successfully created")
 
     return new_job
 
@@ -63,29 +63,29 @@ async def create_vacancy(
 @router.put(
     "/update/{job_id}",
     response_model=JobOut,
-    summary="Обновление вакансии",
-    description="Обновляет информацию о вакансии по заданному id",
+    summary="Update a job vacancy",
+    description="Updates job vacancy information by the given ID",
 )
 async def update_vacancy(
     job_id: int,
-    title: str = Form(..., description="Название вакансии"),
-    status: str = Form(..., description="Статус вакансии"),
-    company_name: str = Form(..., description="Название компании"),
-    company_address: str = Form(..., description="Адрес компании"),
-    logo_url: str = Form(..., description="Логотип компании"),
-    description: str = Form(..., description="Описание вакансии"),
+    title: str = Form(..., description="Job title"),
+    status: str = Form(..., description="Vacancy status"),
+    company_name: str = Form(..., description="Company name"),
+    company_address: str = Form(..., description="Company address"),
+    logo_url: str = Form(..., description="Company logo"),
+    description: str = Form(..., description="Job description"),
     db: Session = Depends(get_db)
 ):
     """
-    **Обновление вакансии**
-    - 🔄 Обновляет информацию о вакансии.
+    **Update a job vacancy**
+    - 🔄 Updates job vacancy information.
     """
 
-    logging.info(f"✅ Попытка обновить вакансию с id: {job_id}")
+    logging.info(f"✅ Attempting to update vacancy with ID: {job_id}")
 
     job = db.query(Job).filter(Job.id == job_id).first()
     if not job:
-        logging.warning(f"❌ Вакансия с id {job_id} не найдена")
+        logging.warning(f"❌ Vacancy with ID {job_id} not found")
         raise HTTPException(status_code=404, detail="Vacancy not found")
 
     job_data = JobUpdate(
@@ -98,7 +98,7 @@ async def update_vacancy(
     )
 
     updated_job = update_job(db, job_id, job_data)
-    logging.info(f"✅ Вакансия с id {job_id} успешно обновлена")
+    logging.info(f"✅ Vacancy with ID {job_id} successfully updated")
 
     return updated_job
 
@@ -106,23 +106,23 @@ async def update_vacancy(
 @router.get(
     "/get/{job_id}",
     response_model=JobOut,
-    summary="Получение вакансии",
-    description="Получает информацию о вакансии по id из внутренней БД",
+    summary="Get a job vacancy",
+    description="Retrieves job vacancy information by ID from the internal database",
 )
 async def get_vacancy(
         job_id: int,
         db: Session = Depends(get_db)
 ):
     """
-    **Получение вакансии**
-    - 📄 Получает информацию о вакансии по её id.
+    **Get a job vacancy**
+    - 📄 Retrieves job vacancy information by its ID.
     """
 
-    logging.info(f"✅ Попытка получить вакансию с id: {job_id}")
+    logging.info(f"✅ Attempting to retrieve vacancy with ID: {job_id}")
 
     job = get_job_by_id(db, job_id)
     if not job:
-        logging.warning(f"❌ Вакансия с id {job_id} не найдена")
+        logging.warning(f"❌ Vacancy with ID {job_id} not found")
         raise HTTPException(status_code=404, detail="Vacancy not found")
 
     return job
@@ -130,27 +130,27 @@ async def get_vacancy(
 
 @router.delete(
     "/delete/{job_id}",
-    summary="Удаление вакансии",
-    description="Удаляет вакансию по заданному id",
+    summary="Delete a job vacancy",
+    description="Deletes a job vacancy by the given ID",
 )
 async def delete_vacancy(
         job_id: int,
         db: Session = Depends(get_db)
 ):
     """
-    **Удаление вакансии**
-    - ❌ Удаляет вакансию по id.
+    **Delete a job vacancy**
+    - ❌ Deletes a job vacancy by ID.
     """
 
-    logging.info(f"✅ Попытка удалить вакансию с id: {job_id}")
+    logging.info(f"✅ Attempting to delete vacancy with ID: {job_id}")
 
     job = get_job_by_id(db, job_id)
     if not job:
-        logging.warning(f"❌ Вакансия с id {job_id} не найдена")
+        logging.warning(f"❌ Vacancy with ID {job_id} not found")
         raise HTTPException(status_code=404, detail="Vacancy not found")
 
     delete_job(db, job_id)
-    logging.info(f"✅ Вакансия с id {job_id} успешно удалена")
+    logging.info(f"✅ Vacancy with ID {job_id} successfully deleted")
 
     return {"message": "Vacancy successfully deleted"}
 
@@ -158,14 +158,14 @@ async def delete_vacancy(
 
 @router.post("/parse")
 async def parse_vacancies(
-        search_query: str = Query(..., description="Поисковый запрос"),
-        count: int = Query(10, description="Количество вакансий для загрузки"),
+        search_query: str = Query(..., description="Search query"),
+        count: int = Query(10, description="Number of vacancies to fetch"),
         db: Session = Depends(get_db)
 ):
     """
-    **Парсинг вакансий с hh.ru**
-    - 🔍 Получает вакансии по заданному поисковому запросу.
-    - 📥 Сохраняет их в БД, если таких ещё нет.
+    **Parse job vacancies from hh.ru**
+    - 🔍 Retrieves vacancies based on the given search query.
+    - 📥 Saves them to the database if they do not already exist.
     """
 
     hh_api_url = "https://api.hh.ru/vacancies"
@@ -174,10 +174,10 @@ async def parse_vacancies(
     response = requests.get(hh_api_url, params=params)
 
     if response.status_code != 200:
-        logging.error("❌ Ошибка запроса к API hh.ru")
+        logging.error("❌ API request to hh.ru failed")
         raise HTTPException(status_code=500, detail="Failed to fetch data from hh.ru")
 
-    logging.info(f"✅ Запрос к API hh.ru {hh_api_url} прошёл успешно")
+    logging.info(f"✅ API request to hh.ru {hh_api_url} was successful")
     vacancies = response.json().get("items", [])
 
     added_count = 0
@@ -188,12 +188,12 @@ async def parse_vacancies(
         employer = vacancy.get("employer")
         address = vacancy.get("address")
 
-        title = vacancy.get("name", "Не указано")
+        title = vacancy.get("name", "Not specified")
         logo_url = employer["logo_urls"]["original"] if employer and employer.get("logo_urls") else ""
-        company_name = employer["name"] if employer and employer.get("name") else "Не указано"
-        company_address = address["city"] if address and address.get("city") else "Не указан"
-        description = vacancy.get("description", "Описание отсутствует")
-        status = vacancy["schedule"]["name"] if vacancy.get("schedule") and vacancy["schedule"].get("name") else "Не указан"
+        company_name = employer["name"] if employer and employer.get("name") else "Not specified"
+        company_address = address["city"] if address and address.get("city") else "Not specified"
+        description = vacancy.get("description", "Description not available")
+        status = vacancy["schedule"]["name"] if vacancy.get("schedule") and vacancy["schedule"].get("name") else "Not specified"
 
         if get_job_by_title(db, title):
             continue
@@ -209,5 +209,5 @@ async def parse_vacancies(
         create_job(db, job_data)
         added_count += 1
 
-    logging.info(f"✅ Добавлено вакансий: {added_count}")
+    logging.info(f"✅ Vacancies added: {added_count}")
     return {"message": "Parsing completed", "added": added_count}
