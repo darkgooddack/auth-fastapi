@@ -11,38 +11,38 @@ logging.basicConfig(level=logging.INFO)
 @router.post(
     "/register",
     response_model=UserOut,
-    summary="Регистрация нового пользователя",
+    summary="Register a new user",
     description="""
-    Создает нового пользователя в системе.  
-    Если пользователь с таким именем уже существует, возвращает ошибку.  
-    Пароль будет зашифрован перед сохранением.
+    Creates a new user in the system.  
+    If a user with the same username already exists, returns an error.  
+    The password will be encrypted before storage.
     """,
     responses={
-        201: {"description": "Пользователь успешно зарегистрирован"},
-        400: {"description": "Пользователь уже существует"}
+        201: {"description": "User successfully registered"},
+        400: {"description": "User already exists"}
     },
 )
 async def register(
-        username: str = Form(..., description="Имя пользователя"),
-        password: str = Form(..., description="Пароль"),
+        username: str = Form(..., description="Username"),
+        password: str = Form(..., description="Password"),
         db: Session = Depends(get_db)
 ):
     """
-    **Регистрация пользователя**
-    - 🔑 Создаёт нового пользователя.
-    - ❌ Возвращает ошибку, если пользователь уже зарегистрирован.
-    - 🔒 Пароль хранится в зашифрованном виде.
+    **User Registration**
+    - 🔑 Creates a new user.
+    - ❌ Returns an error if the user is already registered.
+    - 🔒 The password is stored in an encrypted format.
     """
 
-    logging.info(f"✅ Попытка регистрации пользователя: {username}")
+    logging.info(f"✅ Attempting to register user: {username}")
 
     if get_user_by_username(db, username):
-        logging.warning(f"❌ Регистрация не удалась: пользователь {username} уже существует")
+        logging.warning(f"❌ Registration failed: user {username} already exists")
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # 🔥 Создаем объект UserCreate перед передачей в create_user
+    # 🔥 Create a UserCreate object before passing it to create_user
     user_data = UserCreate(username=username, password=password)
     new_user = create_user(db, user_data)
-    logging.info(f"✅ Пользователь {username} успешно зарегистрирован")
+    logging.info(f"✅ User {username} successfully registered")
 
     return new_user
