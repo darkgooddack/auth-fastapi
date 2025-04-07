@@ -41,7 +41,7 @@ DATABASE_URL=postgresql://user:password@localhost/dbname
 POSTGRES_PASSWORD=password
 POSTGRES_PORT=5432
 
-REDIS_HOST=localhost
+REDIS_HOST=redis <- заменить в своём .env
 REDIS_PORT=6379
 REDIS_DB=0
 
