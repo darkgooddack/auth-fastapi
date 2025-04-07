@@ -11,6 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 from redis.exceptions import RedisError
 from datetime import timedelta
+from app.core.config import settings
 
 # Settings
 SECRET_KEY = "your_secret_key"
@@ -18,8 +19,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 15
 
 # Connecting to Redis
 try:
-    redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
+     redis_client = redis.Redis(
+        host=settings.REDIS_HOST,       # теперь берётся из .env или настроек
+        port=settings.REDIS_PORT,
+        db=settings.REDIS_DB,
+        decode_responses=True
+    )
     redis_client.ping()
+    logging.info("✅ Connected to Redis")
 except RedisError:
     logging.critical("🚨 Connection error to Redis! Make sure the Redis server is running.")
     redis_client = None  # Disable Redis so that the code can work without it
