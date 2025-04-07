@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str
     POSTGRES_PASSWORD: str
     POSTGRES_PORT: int
-    REDIS_HOST: str = "localhost"
+    REDIS_HOST: str = "redis" # в .env заменить на REDIS_HOST=redis
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     SECRET_KEY: str
